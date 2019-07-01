@@ -842,9 +842,72 @@ console.log(sum.apply(null, numbers));
     ```
 
 ### Destructuring
+Extract values của các phần tử trong mảng, property của object thành các biến.
+
+#### Array destructuring
+```js
+const foo = [1, 2, 3];
+
+const [one, two, three] = foo;
+console.log(one); // 1
+console.log(two); // 2
+console.log(three); // 3
+```
+Gán giá trị mặc cho biến nếu vượt quá độ dài của array:
+```js
+const foo = [1, 2];
+
+const [one, two, three = "default"] = foo;
+```
+Swap giá trị của 2 biến:
+```js
+let a = 1;
+let b = 2;
+
+[a, b] = [b, a];
+```
+Bỏ qua phần tử nào đó trong array:
+```js
+const arr = [1, 2, 3];
+
+const [one, , three] = arr;
+```
+Rest elements:
+```js
+const arr = [1, 2, 3, 4];
+
+const [one, two, ...rest] = arr;
+// 1, 2, [3, 4]
+```
+
+#### Object destructuring
+```js
+const o = {p: 42, q: true};
+const {p, q} = o;
+```
+Thay đổi tên biến:
+```js
+const {p: foo, q: bar} = o;
+```
+Giá trị mặc định:
+```js
+const {p, q, r = 'default'} = o;
+```
+Kết hợp việc thay đổi tên biến và giá trị mặc định:
+```js
+const {p: foo, q: bar = 'default bar', r: baz = 'default baz'} = o;
+```
+Function parameter destructuring:
+```js
+function button({name, type = 'default'}) {
+    console.log(name, type);
+}
+
+button({name: 'Edit'});
+```
+
 ### Modules
 ### Generators
 ### for..of
 ### Promise
-### Unicode
 ### Map, Set, WeakMap, WeakSet
