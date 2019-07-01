@@ -282,6 +282,75 @@ class Button extends React.Component {
 }
 ```
 
+### Enhanced Object Properties
+ES6 cung cấp thêm một số cú pháp giúp cho việc khai báo object dễ dàng hơn.
+
+#### Property Shorthand
+Khai báo property và value ngắn gọn:
+```js
+const name = 'Killua';
+const type = 'Transmuter';
+
+const killa = { name, type };
+```
+
+Tương đương với cách cũ:
+```js
+const name = 'Killua';
+const type = 'Transmuter';
+
+const killa = { name: name, type: type };
+```
+
+#### Computed Property Names
+Property của object có thể là dynamic:
+```js
+const event = 'click';
+
+const handlers = {
+    [`on${event}`]: true,
+};
+// {onclick: true}
+```
+
+Nếu viết theo cách cũ:
+```js
+const event = 'click';
+
+const handlers = {};
+handlers[`on${event}`] = true;
+```
+
+### Method Properties
+```js
+const command = {
+    play() {
+        //
+    },
+    pause() {
+        ///
+    },
+    seek(time) {
+        //
+    },
+};
+```
+
+Với cách viết cũ:
+```js
+const command = {
+    play: function () {
+        //
+    },
+    pause: function () {
+        ///
+    },
+    seek: function (time) {
+        //
+    },
+};
+```
+
 ### Arrow function
 Cú pháp viết function ngắn gọn sử dụ dấu `=>` hay còn gọi là **fat arrow**:
 
@@ -686,13 +755,96 @@ class Button extends React.Component {
 }
 ```
 
+### Default parameters
+```js
+function button(name, type = 'default') {
+    return `Render button with name ${name} and type ${type}`;
+}
+
+button('Add');
+button('Edit', 'warning');
+```
+Nếu viết theo cách cũ:
+```js
+function button(name, type) {
+    if (type === undefined) {
+        type = 'default';
+    }
+
+    return `Render button with name ${name} and type ${type}`;
+}
+```
+
+### Rest Parameter
+Trong variadic function (function có số lượng parameters không cố định) thì tập hợp các tham số còn lại của function có thể được nhóm vào một mảng duy nhất gọi là `rest parameter`:
+```js
+function variadicFunction(first, second, ...rest) {
+    console.log(first, second, rest);
+}
+
+variadicFunction(); // undefined, undefined, []
+variadicFunction(1, 2); // 1, 2, []
+variadicFunction(1, 2, 3, 4); // 1, 2, [3, 4]
+```
+
+### Spread Operator
+Spread operator `...` dùng để extract các phần tử của array (hoặc string) thành các tham số khi gọi function hoặc khi thêm vào array khác.
+
+#### Function call
+```js
+function sum(x, y, z) {
+    return x + y + z;
+}
+
+const numbers = [1, 2, 3];
+
+console.log(sum(...numbers));
+// Old ways:
+console.log(sum(numbers[0], numbers[1], numbers[2]));
+console.log(sum.apply(null, numbers));
+```
+
+#### Array
+- Tạo array mới chứa array cũ
+    ```js
+    const parts = ['shoulders', 'knees'];
+    const lyrics = ['head', ...parts, 'and', 'toes'];
+    // ["head", "shoulders", "knees", "and", "toes"]
+    ```
+    Khi chưa có spread:
+    ```js
+    const parts = ['shoulders', 'knees'];
+    let lyrics = ['head'];
+        lyrics = lyrics.concat(parts).concat(['and', 'toes']);
+    ```
+- Copy array
+    ```js
+    const arr = [1, 2, 3];
+    const copiedArr = [...arr]; // like arr.slice()
+    copiedArr.push(4);
+
+    // copiedArr == [1, 2, 3, 4]
+    // arr == [1, 2, 3]
+    ```
+- Concat array
+    ```js
+    const arr1 = [0, 1, 2];
+    const arr2 = [3, 4, 5];
+    const newArr = [...arr1, ...arr2]; // newArr == [0, 1, 2, 3, 4, 5]
+    // newArr = arr1.concat(arr2);
+    ```
+- Unshift array
+    ```js
+    const arr1 = [0, 1, 2];
+    const arr2 = [3, 4, 5];
+    const newArr = [...arr2, ...arr1]; // newArr == [3, 4, 5, 0, 1, 2]
+    // Array.prototype.unshift.apply(arr1, arr2) // arr1 modified
+    ```
+
 ### Destructuring
 ### Modules
 ### Generators
 ### for..of
 ### Promise
-### Default parameters
-### Rest parameters
-### Spread Operator
 ### Unicode
 ### Map, Set, WeakMap, WeakSet
