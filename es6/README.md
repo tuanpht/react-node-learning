@@ -118,6 +118,170 @@ const obj = {
 const superPowerString = `How are you, ${name}? - I'm fine. ${thanks()} ${obj.ask()}`;
 ```
 
+### Class
+Cú pháp khá giống với các ngôn ngữ class based OOP như PHP hoặc Java.
+
+Class trong ES6 support kế thừa, super (parent) calls, instance method, static methods and constructor.
+
+#### Constructor
+```js
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+}
+
+let dog = new Animal('Golden Retriever');
+console.log(dog.name);
+```
+
+#### Instance method
+```js
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+
+    introduce() {
+        console.log(`My name is ${this.name}`);
+    }
+}
+
+let dog = new Animal('Golden Retriever');
+console.log(dog.introduce());
+```
+
+#### Static method
+```js
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+
+    static species() {
+        return 1300000;
+    }
+}
+
+console.log(Animal.species());
+```
+
+#### Getter & Setter
+ES6 class support define các getter, setter cho các property của object. Cho phép chúng ta custom logic khi đọc/ghi giá trị của property, chẳng hạn validate, biến đổi giá trị...
+```js
+class Animal {
+    constructor(name) {
+        this._name = name;
+    }
+
+    get name() {
+        return this._name.toUpperCase();
+    }
+
+    set name(name) {
+        this._name = name.toLowerCase();
+    }
+}
+
+let dog = new Animal('Golden Retriever');
+console.log(dog.name);
+
+dog.name = 'Husky';
+console.log(dog.name);
+```
+Nhìn vào class có thể nhầm lẫn `name()` là một instance method, nhưng ở đây nó là method đặc biệt, chúng ta không thể gọi trực tiếp method này mà từ tên method => tên property.
+
+```js
+let dog = new Animal('Golden Retriever');
+dog.name(); // ERROR
+dog.name; // OK
+```
+
+#### Inheritance
+```js
+class Animal {
+    constructor(name) {
+        this._name = name;
+    }
+
+    get name() {
+        return this._name.toUpperCase();
+    }
+
+    set name(name) {
+        this._name = name.toLowerCase();
+    }
+
+    introduce() {
+        console.log(`My name is ${this.name}`);
+    }
+
+    static species() {
+        return 1300000;
+    }
+}
+
+class Cat extends Animal {
+    constructor(name, isReal) {
+        super(name);
+
+        this.isReal = isReal;
+    }
+
+    static species() {
+        return NaN;
+    }
+}
+
+let tom = new Cat('Tom', false);
+console.log(tom);
+tom.introduce();
+console.log(Cat.species());
+```
+
+#### Class fields
+ES vẫn chưa chính thức support việc khai báo private/public property của object class, tính năng này vẫn đang còn được thảo luận ([Proposal Stage 3](https://github.com/tc39/proposal-class-fields)).
+```js
+class Rectangle {
+    constructor(height, width) {
+        this.height = height;
+        this.width = width;
+    }
+}
+
+// Static field
+Rectangle.staticWidth = 20;
+```
+Với proposal này ta có thể viết khai báo instance field và static field như sau:
+```js
+class Rectangle {
+    height = 0;
+    width;
+
+    static staticWidth = 20;
+
+    constructor(height, width) {
+        this.height = height;
+        this.width = width;
+    }
+}
+```
+
+Nếu sử dụng Create React App thì tính năng này cũng đã được enable, chúng ta có thể sử dụng nó:
+```jsx
+class Button extends React.Component {
+    static defaultProps = {
+        type: 'primary',
+    }
+
+    static propTypes = {
+        children: PropTypes.string,
+    };
+
+    static contextType = MyContext;
+}
+```
+
 ### Arrow function
 Cú pháp viết function ngắn gọn sử dụ dấu `=>` hay còn gọi là **fat arrow**:
 
@@ -249,7 +413,7 @@ function whoami() {
     > => `this` ở đây là đối tượng `obj`, do method `whoami` được `obj` gọi
 
 - Thông qua `apply()` hoặc `call()`:
-    Nhớ lại, trong JS function cũng là một object và object này có một số method mặc định. Trong đó `apply` và `call`, mục đích của 2 method này giống nhau, chỉ khác trong cách truyền tham số:
+    Nhớ lại, trong JS function cũng là một object và object này có một số method mặc định. Trong đó có `apply` và `call`, mục đích của 2 method này giống nhau, chỉ khác trong cách truyền tham số:
     ```js
     function.apply(thisArg, [argsArray])
     //
@@ -428,8 +592,9 @@ function whoami() {
     }
     ```
     Xem thêm ví dụ về React => https://codesandbox.io/s/hardcore-johnson-h6eki
+
 ##### `lexical this` là gì?
-Khác với function thông thường, arrow function không tự bind `this` và chúng ta cũng không dùng các method `call()`, `apply()`, `bind()` để "set this" cho function.
+Khác với function thông thường, arrow function không tự bind `this` và chúng ta cũng không dùng được các method `call()`, `apply()`, `bind()` để "set this" cho function.
 
 `this` trong arrow function được xác định dựa vào nơi mà nó được define (hoặc là global hoặc bên trong class hoặc bên trong function khác).
 
@@ -502,7 +667,24 @@ class Button extends React.Component {
 ```
 Vì arrow function được khai báo bên trong class, `this` tham chiếu đến chính đối tượng của class này, chứ không tự động bind theo ngữ cảnh lúc gọi nữa.
 
-### Class
+Hoặc sử dụng proposal class fields (đã được [include](https://facebook.github.io/create-react-app/docs/supported-browsers-features) trong Create React App):
+```jsx
+class Button extends React.Component {
+    // This syntax ensures `this` is bound within handleClick.
+    // Warning: this is *experimental* syntax.
+    handleClick = () => {
+        console.log('this is:', this);
+    }
+
+    render() {
+        return (
+            <button onClick={this.handleClick}>
+                Click me
+            </button>
+        );
+    }
+}
+```
 
 ### Destructuring
 ### Modules
