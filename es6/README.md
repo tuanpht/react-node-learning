@@ -907,7 +907,208 @@ button({name: 'Edit'});
 ```
 
 ### Modules
-### Generators
+Trong ES6, bạn có thể `import` và `export` các chức năng từ các module giữa các file. Những chức năng này có thể là function, class, constant,... về cơ bản là mọi thứ bạn có thể gán vào một biến.
+
+Những  module có thể là những file riêng biệt hoặc toàn bộ folder với một file index như là một `entry point`.
+
+Các câu lệnh `import` và `export` giúp bạn thực hiện code splitting, bạn viết code ra nhiều file, giúp cho việc sử dụng lại và maintain, thiết kế các module chức năng. Hơn nữa, nó giúp bạn suy nghĩ về tính đóng gói. Không phải mọi chức năng trong module cần export ra bên ngoài mà chỉ được dùng trong cùng file. Những chức năng được export giống như là public API của module, chỉ những chức năng được export có thể được sử dụng lại bên ngoài.
+
+Có hai cách `export`:
+- Export theo tên: **named export**
+- Export `default`
+
+### Named export
+VD: Export biến từ `file1.js` the kiểu **named export**:
+```js
+const firstname = 'robin';
+const lastname = 'wieruch';
+export { firstname, lastname };
+```
+Hoặc export từng biến:
+```js
+export const firstname = 'robin';
+export const lastname = 'wieruch';
+```
+Và sau đó import vào `file2.js`:
+```js
+import { firstname, lastname } from './file1.js';
+console.log(firstname);
+// output: robin
+```
+
+Bạn cũng có thể import tất cả biến được export từ file khác như là một object.
+
+`file2.js`:
+```js
+import * as person from './file1.js';
+console.log(person.firstname);
+// output: robin
+```
+
+Import có thể có một alias, bạn có thể sử dụng nó trong trường hợp import 2 chức năng từ 2 module có cùng tên :
+`file2.js`:
+```js
+import { firstname as foo } from './file1.js';
+console.log(foo);
+// output: robin
+```
+
+### Export default
+Với `default` export, bạn có thể sử dụng trong các trường hợp:
+- Export duy nhất một chức năng
+- Để làm nổi bật chức năng chính của module
+
+Ví dụ
+`file1.js`:
+```js
+const robin = {
+    firstname: 'robin',
+    lastname: 'wieruch',
+};
+
+export default robin;
+```
+
+Khi import, bạn có thể bỏ qua dấu ngoặc cho việc import `default` export.
+
+`file2.js`:
+```js
+import developer from './file1.js';
+console.log(developer);
+// output: { firstname: 'robin', lastname: 'wieruch' }
+```
+Hơn nữa, tên import có thể khác với export default name.
+
+Bạn cũng có thể kết hợp cả hai kiểu export:
+
+`file1.js`:
+```js
+const firstname = 'robin';
+const lastname = 'wieruch';
+const person = {
+    firstname,
+    lastname,
+};
+
+export {
+    firstname,
+    lastname,
+};
+
+export default person;
+```
+
+`file2.js`:
+```js
+import developer, { firstname, lastname } from './file1.js';
+console.log(developer);
+// output: { firstname: 'robin', lastname: 'wieruch' }
+console.log(firstname, lastname);
+// output: robin wieruch
+```
+
+### Map, Set
+#### Kiểu dữ liệu `Map`
+Tương tự như object dạng key-value, nhưng có những điểm khác biệt:
+- Key của object chỉ có thể là string, number hoặc [Symbol](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol), trong khi đó key của map có thể là bất cứ giá trị nào bao gồm cả function, object.
+    ```js
+    const myMap = new Map();
+
+    const keyString = 'a string';
+    const keyObj = {};
+    const keyFunc = function() {};
+
+    // setting the values
+    myMap.set(keyString, "value associated with 'a string'");
+    myMap.set(keyObj, 'value associated with keyObj');
+    myMap.set(keyFunc, 'value associated with keyFunc');
+
+    myMap.size; // 3
+    ```
+- Thứ tự insert của key trong Map được giữ nguyên khi lặp
+- Map có method `size()` để biết số lượng phần tử trong Map
+- Map là một iterable object nên có thể sử dụng trong `for..of`, `forEach`
+    ```js
+    const myMap = new Map();
+    myMap.set(0, 'zero');
+    myMap.set(1, 'one');
+    for (const [key, value] of myMap) {
+        console.log(key + ' = ' + value);
+    }
+    // 0 = zero
+    // 1 = one
+
+    myMap.forEach(function(value, key) {
+        console.log(key + ' = ' + value);
+    });
+    ```
+- Object có prototype nên nó sẽ có một số key mặc định
+- Map phù hợp hơn trong các kịch bản thêm, xóa key-value thường xuyên
+#### Kiểu dữ liệu `Set`
+Là một tập hợp, gồm các phần tử có unique value.
+```js
+var mySet = new Set();
+
+mySet.add(1); // Set [ 1 ]
+mySet.add(5); // Set [ 1, 5 ]
+mySet.add(5); // Set [ 1, 5 ]
+```
+
 ### for..of
+Thêm 1 cú pháp để lặp các `iterable objects`: String, Array, Map, Set...
+```js
+let iterable = [10, 20, 30];
+
+for (let value of iterable) {
+  value += 1;
+  console.log(value);
+}
+
+for (const value of iterable) {
+  console.log(value);
+}
+```
+
+### Generators
+- Là những function có thể tạm dừng và tiếp tục ở một thời điểm khác sau khi gọi
+    ```js
+    function* generator(i) {
+        yield i;
+        i = i + 5;
+        yield;
+        yield i + 10;
+        return 100;
+    }
+
+    var gen = generator(10);
+    console.log(gen.next()); // { value: 10, done: false }
+    console.log(gen); // Generator object
+    console.log(gen.next().value); // undefined
+    console.log(gen.next().value); // 25
+    console.log(gen.next().value); // 100
+    ```
+- Sử dụng từ khóa `function*` để khai báo một generator function
+- Sử dụng `yield` để tạm dừng function và trả về giá trị cho method `next()`
+- Giá trị trả về khi gọi một generator function đó là một `Generator Object`
+    + `Generator Object` có thể dùng trong vòng lặp `for..of`
+        ```js
+        function* foo() {
+            yield 1;
+            yield 2;
+            yield 3;
+            yield 4;
+            yield 5;
+            return 6; // Not include in for..of
+        }
+
+        for (const v of foo()) {
+            console.log(v);
+        }
+        // 1 2 3 4 5
+        ```
+        > Chú ý là `for..of` ignore giá trị `return 6`
+
+    + Hoặc gọi nhiều lần method `next()` resume function, chạy đến từng điểm đã `yield` trong function cho đến khi gặp return hoặc `yield` cuối cùng
+    + Method `next()` trả về object có dạng `{value: value, done: true/false}`, `value` là do yield hoặc `return` trả về và `done` để xác định generator đã kết thúc chưa
+
 ### Promise
-### Map, Set, WeakMap, WeakSet
