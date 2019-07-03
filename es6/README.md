@@ -1112,3 +1112,119 @@ for (const value of iterable) {
     + Method `next()` trả về object có dạng `{value: value, done: true/false}`, `value` là do yield hoặc `return` trả về và `done` để xác định generator đã kết thúc chưa
 
 ### Promise
+- Hỗ trợ lập trình bất đồng bộ (asynchronous)
+- Promise là một object đại diện cho kết quả hoặc lỗi của một hoạt động bất đồng bộ
+- Thay vì truyền callback vào function, Promise object cho phép chúng ta attach callback và chaining:
+    Ví dụ truyền callback:
+    ```js
+    function successCallback(result) {
+        console.log("Data loaded: ", + result);
+    }
+
+    function failureCallback(error) {
+        console.log("Error loading data: " + error);
+    }
+
+    loadData(options, successCallback, failureCallback);
+    ```
+    Sử dụng promise:
+    ```js
+    loadData(options).then(successCallback, failureCallback);
+
+    // const promise = loadData(options);
+    // promise.then(successCallback, failureCallback);
+    ```
+- Then chaining
+    Method `then()` trả về một promise mới, vì thế có thể chaining `then()` nhiều lần.
+    ```js
+    doSomething()
+        .then(function(result) {
+            return doSomethingElse(result);
+        })
+        .then(function(newResult) {
+            return doThirdThing(newResult);
+        })
+        .then(function(finalResult) {
+            console.log('Got the final result: ' + finalResult);
+        })
+        .catch(failureCallback);
+    ```
+    > Cần chú ý return value ở `then()` thì `then()` sau mới có result
+    > Promise chaining dừng nếu có exception, khi đó các `then()` ở sau bị bỏ qua và chỉ có `catch` handlers được gọi
+
+    Nếu truyền callback cũ thì có dẫn đến callback hell như thế này:
+    ```js
+    doSomething(function(result) {
+        doSomethingElse(result, function(newResult) {
+            doThirdThing(newResult, function(finalResult) {
+                console.log('Got the final result: ' + finalResult);
+            }, failureCallback);
+        }, failureCallback);
+    }, failureCallback);
+    ```
+    Ví dụ với fetch:
+    ```js
+    fetch(url, options)
+        .then(response => response.json())
+        .then(data => console.log(data))
+    ```
+    => `then()` thứ nhất json decode response string, `then()` thứ hai lấy data từ promise của `then()` thứ nhất.
+
+- Chạy song song nhiều async function
+    ```js
+    Promise.all([func1(), func2(), func3()])
+        .then(([result1, result2, result3]) => { /* use result1, result2 and result3 */ });
+
+    const wait = second => new Promise(resolve => setTimeout(() => resolve(second), 1000 * second));
+    const multipleWaits = seconds => {
+        let promises = seconds.map(second => wait(second));
+
+        return Promise.all(promises);
+    }
+
+    multipleWaits([1, 2, 3]).then(results => console.log(results)); // done in 3 seconds
+    ```
+- Sai lầm thường gặp
+    + Không return value
+    ```js
+    doSomething()
+        .then(function(result) {
+            doSomethingElse(result); // No return
+        })
+        .then((newResult) => console.log(newResult)); // undefined
+    ```
+    + Nesting promise. Vì `then()` return promise, không cần phải chaing bên trong callback
+    ```js
+    // Bad
+    doSomethingCritical()
+        .then(result => doSomethingOptional()
+            .then(optionalResult => doSomethingExtraNice(optionalResult))
+            .catch(e => {})); // No need nesting
+        .then(() => moreCriticalStuff())
+        .catch(e => console.log("Critical failure: " + e.message));
+
+    // Better
+    doSomethingCritical()
+        .then(result => doSomethingOptional())
+        .then(optionalResult => doSomethingExtraNice(optionalResult))
+        .then(() => moreCriticalStuff())
+        .catch(e => console.log("Critical failure: " + e.message));
+    ```
+    + Không `catch` error có thể dẫn đến lỗi "Uncaught promise rejections" (có thể làm crash Nodejs app)
+
+## ES 2016
+### Exponent (**) operator
+Có thể dùng thay thế cho `Math.pow`:
+```js
+Math.pow(2, 3) == 2 ** 3;
+```
+
+### Array method `includes`
+
+## ES 2017
+### Object.values, Object.entries
+### Async function
+
+## ES 2018
+### Object rest/spread operators
+### Promise `finally`
