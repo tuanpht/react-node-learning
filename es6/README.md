@@ -1220,11 +1220,161 @@ Math.pow(2, 3) == 2 ** 3;
 ```
 
 ### Array method `includes`
+Check phần tử có thuộc array:
+```js
+const numbers = [1, 2, 3];
+console.log(numbers.includes(2)); // true
+
+const pets = ['cat', 'dog', 'bat'];
+console.log(pets.includes('cat')); // true
+console.log(pets.includes('at')); // false
+```
 
 ## ES 2017
 ### Object.values, Object.entries
-### Async function
+`Object.values` trả về mảng giá trị của từng key trong object:
+```js
+const object1 = {
+    a: 'somestring',
+    b: 42,
+    c: false
+};
+
+console.log(Object.values(object1));
+// expected output: Array ["somestring", 42, false]
+```
+
+`Object.entries` trả về mảng cặp giá trị [key, value] của object:
+```js
+const object1 = {
+    a: 'somestring',
+    b: 42
+};
+
+for (let [key, value] of Object.entries(object1)) {
+  console.log(`${key}: ${value}`);
+}
+// expected output:
+// "a: somestring"
+// "b: 42"
+```
+
+### Async / Await
+- Sử dụng Promise như cách lập trình đồng bộ thông thường (synchronous)
+- await chỉ có thể được dùng trong async function để tạm dừng async function *chờ* kết quả từ một Promise
+    ```js
+    function resolveAfter2Seconds() {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve('resolved');
+            }, 2000);
+        });
+    }
+
+    function promiseCall() {
+        console.log('calling');
+        return resolveAfter2Seconds()
+            .then(result => console.log(result));
+            // expected output: 'resolved'
+    }
+    promiseCall();
+
+    async function asyncCall() {
+        console.log('calling');
+        const result = await resolveAfter2Seconds();
+        console.log(result);
+        // expected output: 'resolved'
+    }
+    asyncCall();
+    ```
+- Giá trị trả về function async function luôn là một Promise, vì được ngầm định wrapped trong `Promise.resolve()`
+- Await trong loop
+    ```js
+    function wait(second) {
+        return new Promise(resolve => {
+            setTimeout(() => resolve('Resolved ' + second), 1000 * second);
+        });
+    }
+
+    function returnPromises(seconds) {
+        // async function always returns promise
+        // so this will return array of promises
+        return seconds.map(async second => await wait(second));
+    }
+
+    function returnOnePromise(seconds) {
+        const promises = seconds.map(async second => await wait(second));
+
+        // Use Promise.all to return only one promise
+        return Promise.all(promises);
+    }
+
+    async function test() {
+        const seconds = [1, 2, 3];
+        const promises = await returnPromises(seconds);
+        console.log(promises); // Run immediately because we just return array of promises as result of `map()` function
+
+        const values = await returnOnePromise(seconds);
+        console.log(values); // After 3 seconds
+    }
+
+    async function testConcurrent() {
+        const start = performance.now();
+        const values1 = returnOnePromise([1, 2]);
+        const values2 = returnOnePromise([1, 2, 3]);
+
+        console.log(await values1); // 2 seconds from start
+        console.log(performance.now() - start);
+        console.log(await values2); // + 1 seconds = 3 seconds from start
+        console.log(performance.now() - start);
+    }
+    ```
 
 ## ES 2018
 ### Object rest/spread operators
+- Support rest/spread operator cho object:
+- Rest properties:
+    ```js
+    let { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 };
+    x; // 1
+    y; // 2
+    z; // { a: 3, b: 4 }
+    ```
+- Spread properties:
+    ```js
+    let n = { x, y, ...z };
+    n; // { x: 1, y: 2, a: 3, b: 4 }
+    ```
+    Clone, merge object:
+    ```js
+    const obj1 = { foo: 'bar', x: 42 };
+    const obj2 = { foo: 'baz', y: 13 };
+
+    const clonedObj1 = { ...obj1 };
+    clonedObj1.foo = 'changed';
+    // clonedObj1 { foo: "changed", x: 42 }
+    // obj1 { foo: "bar", x: 42 }
+
+    const mergedObj = { ...obj1, ...obj2 };
+    // Object { foo: "baz", x: 42, y: 13 }
+    ```
+
 ### Promise `finally`
+- Define callback được thực thi trong cả 2 trường hợp Promise chạy thành công hoặc có lỗi
+- Tránh lặp code trong `then()` và `catch()`, chẳng hạn set trạng thái loading khi gọi ajax:
+    ```js
+    let isLoading = true;
+
+    fetch(url)
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.log(error))
+        .finally(() => isLoading = false);
+    ```
+
+## Reference
+- http://es6-features.org/
+- https://github.com/lukehoban/es6features/
+- https://kangax.github.io/compat-table/es6/
+- https://medium.com/craft-academy/everything-i-learned-from-es6-for-everyone-ff93ebc64b86
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript
