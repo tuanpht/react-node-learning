@@ -40,25 +40,51 @@ class TodoList extends React.Component {
   }
 }
 
-class App extends React.Component {
+class TodoFormCreate extends React.Component {
   state = {
-    todos: [],
     inputTodo: '',
-    filterType: FILTER_TYPE.ALL,
   };
 
   nextId = generateId();
 
-  addTodo = (e) => {
-    e.preventDefault();
-    this.setState((prevState) => ({
-      todos: [...prevState.todos, { id: this.nextId.next().value, title: prevState.inputTodo, completed: false }],
-      inputTodo: '',
-    }));
-  };
-
   onInputTodoChange = (e) => {
     this.setState({ inputTodo: e.target.value });
+  };
+
+  onSubmit = (e) => {
+    e.preventDefault();
+
+    this.props.onTodoAdded({
+      id: this.nextId.next().value,
+      title: this.state.inputTodo,
+      completed: false,
+    });
+
+    this.setState({ inputTodo: '' });
+  };
+
+  render() {
+    const { inputTodo } = this.state;
+
+    return (
+      <form className="todo-form" onSubmit={this.onSubmit}>
+        <input value={inputTodo} onChange={this.onInputTodoChange} required />
+        <button type="submit">Add</button>
+      </form>
+    );
+  }
+}
+
+class App extends React.Component {
+  state = {
+    todos: [],
+    filterType: FILTER_TYPE.ALL,
+  };
+
+  addTodo = (todo) => {
+    this.setState((prevState) => ({
+      todos: [...prevState.todos, todo],
+    }));
   };
 
   onFilterTodo = (e) => {
@@ -91,7 +117,7 @@ class App extends React.Component {
   };
 
   render() {
-    const { filterType, inputTodo, todos } = this.state;
+    const { filterType, todos } = this.state;
     const filteredTodos = this.filterTodos(filterType);
     return (
       <React.Fragment>
@@ -99,10 +125,7 @@ class App extends React.Component {
           <h1 style={{ textAlign: 'center' }}>My TODO List</h1>
           <fieldset>
             <legend>Add new Todo</legend>
-            <form className="todo-form" onSubmit={this.addTodo}>
-              <input value={inputTodo} onChange={this.onInputTodoChange} />
-              <button type="submit">Add</button>
-            </form>
+            <TodoFormCreate onTodoAdded={this.addTodo} />
           </fieldset>
           <fieldset>
             <legend>Filter</legend>
