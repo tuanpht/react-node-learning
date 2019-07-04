@@ -17,3 +17,12 @@ code {
   margin: 10px auto;
   padding: 0 10px;
 }
+
+fieldset {
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+}
+
+legend {
+  font-weight: 500;
+}
