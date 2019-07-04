@@ -25,6 +25,21 @@ class Todo extends React.Component {
   }
 }
 
+class TodoList extends React.Component {
+  render() {
+    const { todos } = this.props;
+    return (
+      <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <Todo todo={todo} onTodoStatusChanged={this.toggleTodoStatus} />
+          </li>
+        ))}
+      </ul>
+    );
+  }
+}
+
 class App extends React.Component {
   state = {
     todos: [],
@@ -76,7 +91,8 @@ class App extends React.Component {
   };
 
   render() {
-    const { filterType, inputTodo } = this.state;
+    const { filterType, inputTodo, todos } = this.state;
+    const filteredTodos = this.filterTodos(filterType);
     return (
       <React.Fragment>
         <header>
@@ -105,14 +121,10 @@ class App extends React.Component {
         </header>
         <main>
           <fieldset>
-            <legend>Todo list</legend>
-            <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
-              {this.filterTodos(filterType).map((todo) => (
-                <li key={todo.id}>
-                  <Todo todo={todo} onTodoStatusChanged={this.toggleTodoStatus} />
-                </li>
-              ))}
-            </ul>
+            <legend>
+              Todo list (showing: {filteredTodos.length} / {todos.length})
+            </legend>
+            <TodoList todos={filteredTodos} />
           </fieldset>
         </main>
       </React.Fragment>
