@@ -14,11 +14,18 @@ const FILTER_TYPE = {
 };
 
 class Todo extends React.Component {
+  onChange = (e) => {
+    const updatedTodo = { ...this.props.todo, completed: e.target.checked };
+
+    this.props.onTodoChanged(updatedTodo);
+  };
+
   render() {
-    const { todo, onTodoStatusChanged } = this.props;
+    const { todo } = this.props;
+
     return (
       <label>
-        <input type="checkbox" checked={todo.completed} onChange={() => onTodoStatusChanged(todo.id)} />
+        <input type="checkbox" checked={todo.completed} onChange={this.onChange} />
         {todo.title}
       </label>
     );
@@ -27,12 +34,13 @@ class Todo extends React.Component {
 
 class TodoList extends React.Component {
   render() {
-    const { todos } = this.props;
+    const { todos, onTodoChanged } = this.props;
+
     return (
       <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
         {todos.map((todo) => (
           <li key={todo.id}>
-            <Todo todo={todo} onTodoStatusChanged={this.toggleTodoStatus} />
+            <Todo todo={todo} onTodoChanged={onTodoChanged} />
           </li>
         ))}
       </ul>
@@ -105,11 +113,11 @@ class App extends React.Component {
     }
   };
 
-  toggleTodoStatus = (todoId) => {
+  updateTodo = (updatedTodo) => {
     this.setState((prevState) => ({
       todos: prevState.todos.map((todo) => {
-        if (todo.id === todoId) {
-          return { ...todo, completed: !todo.completed };
+        if (todo.id === updatedTodo.id) {
+          return { ...updatedTodo };
         }
         return { ...todo };
       }),
@@ -147,7 +155,7 @@ class App extends React.Component {
             <legend>
               Todo list (showing: {filteredTodos.length} / {todos.length})
             </legend>
-            <TodoList todos={filteredTodos} />
+            <TodoList todos={filteredTodos} onTodoChanged={this.updateTodo} />
           </fieldset>
         </main>
       </React.Fragment>
