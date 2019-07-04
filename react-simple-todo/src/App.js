@@ -83,6 +83,28 @@ class TodoFormCreate extends React.Component {
   }
 }
 
+class TodoFormFilter extends React.Component {
+  onFormChanged = (e) => {
+    this.props.onFilterTypeChanged(e.target.value);
+  };
+
+  render() {
+    return (
+      <form onChange={this.onFormChanged}>
+        <label>
+          <input type="radio" name="filterType" value={FILTER_TYPE.ALL} /> All
+        </label>
+        <label>
+          <input type="radio" name="filterType" value={FILTER_TYPE.COMPLETED} /> Completed
+        </label>
+        <label>
+          <input type="radio" name="filterType" value={FILTER_TYPE.ACTIVE} /> Active
+        </label>
+      </form>
+    );
+  }
+}
+
 class App extends React.Component {
   state = {
     todos: [],
@@ -95,8 +117,8 @@ class App extends React.Component {
     }));
   };
 
-  onFilterTodo = (e) => {
-    this.setState({ filterType: e.target.value });
+  onFilterTodo = (filterType) => {
+    this.setState({ filterType: filterType });
   };
 
   filterTodos = (type) => {
@@ -137,17 +159,7 @@ class App extends React.Component {
           </fieldset>
           <fieldset>
             <legend>Filter</legend>
-            <form onChange={this.onFilterTodo}>
-              <label>
-                <input type="radio" name="filterType" value={FILTER_TYPE.ALL} /> All
-              </label>
-              <label>
-                <input type="radio" name="filterType" value={FILTER_TYPE.COMPLETED} /> Completed
-              </label>
-              <label>
-                <input type="radio" name="filterType" value={FILTER_TYPE.ACTIVE} /> Active
-              </label>
-            </form>
+            <TodoFormFilter onFilterTypeChanged={this.onFilterTodo} />
           </fieldset>
         </header>
         <main>
