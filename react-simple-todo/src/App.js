@@ -13,6 +13,18 @@ const FILTER_TYPE = {
   ACTIVE: 'active',
 };
 
+class Todo extends React.Component {
+  render() {
+    const { todo, onTodoStatusChanged } = this.props;
+    return (
+      <label>
+        <input type="checkbox" checked={todo.completed} onChange={() => onTodoStatusChanged(todo.id)} />
+        {todo.title}
+      </label>
+    );
+  }
+}
+
 class App extends React.Component {
   state = {
     todos: [],
@@ -52,8 +64,7 @@ class App extends React.Component {
     }
   };
 
-  toggleTodoStatus = (e) => {
-    const todoId = parseInt(e.target.value);
+  toggleTodoStatus = (todoId) => {
     this.setState((prevState) => ({
       todos: prevState.todos.map((todo) => {
         if (todo.id === todoId) {
@@ -98,10 +109,7 @@ class App extends React.Component {
             <ul style={{ listStyleType: 'none', padding: 0, margin: 0 }}>
               {this.filterTodos(filterType).map((todo) => (
                 <li key={todo.id}>
-                  <label>
-                    <input type="checkbox" value={todo.id} checked={todo.completed} onChange={this.toggleTodoStatus} />
-                    {todo.title}
-                  </label>
+                  <Todo todo={todo} onTodoStatusChanged={this.toggleTodoStatus} />
                 </li>
               ))}
             </ul>
