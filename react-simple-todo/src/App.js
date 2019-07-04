@@ -61,6 +61,7 @@ class TodoFormCreate extends React.Component {
 
   onSubmit = (e) => {
     e.preventDefault();
+    const form = e.target;
 
     this.props.onTodoAdded({
       id: this.nextId.next().value,
@@ -68,7 +69,7 @@ class TodoFormCreate extends React.Component {
       completed: false,
     });
 
-    this.setState({ inputTodo: '' });
+    this.setState({ inputTodo: '' }, () => form.reset());
   };
 
   render() {
