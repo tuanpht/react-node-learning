@@ -27,6 +27,34 @@ class Todo {
   }
 }
 
+class TodoNotFound extends Error {
+  constructor(message) {
+    super(message);
+
+    this.name = 'TodoNotFound';
+    this.status = 404;
+  }
+}
+
+class TodoQuery {
+  findById(id) {
+    let todo = null;
+
+    for (let todoTmp of todos) {
+      if (id == todoTmp.id) {
+        todo = todoTmp;
+        break;
+      }
+    }
+
+    if (!todo) {
+      throw new TodoNotFound('Todo not found!');
+    }
+
+    return todo;
+  }
+}
+
 router.get('/', function(req, res) {
   res.json({ data: todos });
 });
@@ -50,41 +78,13 @@ router.post('/', function(req, res) {
 });
 
 router.get('/:id', function(req, res) {
-  const { id: todoId } = req.params;
-  let todo = null;
-
-  for (let todoTmp of todos) {
-    if (todoId == todoTmp.id) {
-      todo = todoTmp;
-      break;
-    }
-  }
-
-  if (!todo) {
-    return res.status(404).json({
-      message: 'Todo not found!',
-    });
-  }
+  const todo = new TodoQuery().findById(req.params.id);
 
   return res.json(todo);
 });
 
 router.put('/:id', function(req, res) {
-  const { id: todoId } = req.params;
-  let todo = null;
-
-  for (let todoTmp of todos) {
-    if (todoId == todoTmp.id) {
-      todo = todoTmp;
-      break;
-    }
-  }
-
-  if (!todo) {
-    return res.status(404).json({
-      message: 'Todo not found!',
-    });
-  }
+  const todo = new TodoQuery().findById(req.params.id);
 
   let { title, completed } = req.body;
 
@@ -127,6 +127,15 @@ router.delete('/:id', function(req, res) {
   todos.splice(todoIndex, 1);
 
   return res.json(todo);
+});
+
+// Error handler
+router.use(function(err, req, res, next) {
+  if (err instanceof TodoNotFound) {
+    return res.status(err.status).json({ message: err.message });
+  }
+
+  next(err);
 });
 
 module.exports = router;
