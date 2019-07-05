@@ -12,6 +12,21 @@ function* generateId() {
 
 const idGenerator = generateId();
 
+class Todo {
+  constructor(title, completed = false) {
+    this.id = idGenerator.next().value;
+    this.title = title;
+    this.completed = completed;
+  }
+
+  update({ title, completed = null }) {
+    this.title = title;
+    if (completed !== null) {
+      this.completed = !!completed;
+    }
+  }
+}
+
 router.get('/', function(req, res) {
   res.json({ data: todos });
 });
@@ -27,11 +42,7 @@ router.post('/', function(req, res) {
     });
   }
 
-  const todo = {
-    id: idGenerator.next().value,
-    title: title,
-    completed: false,
-  };
+  const todo = new Todo(title);
 
   todos.push(todo);
 
@@ -85,10 +96,10 @@ router.put('/:id', function(req, res) {
     });
   }
 
-  if (completed !== undefined) {
-    todo.completed = !!completed;
-  }
-  todo.title = title;
+  todo.update({
+    title,
+    completed,
+  });
 
   return res.status(200).json(todo);
 });
