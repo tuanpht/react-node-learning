@@ -25,6 +25,10 @@ class Todo {
       this.completed = !!completed;
     }
   }
+
+  delete() {
+    this.deleted_at = new Date();
+  }
 }
 
 class TodoNotFound extends Error {
@@ -37,6 +41,10 @@ class TodoNotFound extends Error {
 }
 
 class TodoQuery {
+  findAll() {
+    return todos.filter((todo) => !todo.deleted_at);
+  }
+
   findById(id) {
     let todo = null;
 
@@ -47,7 +55,7 @@ class TodoQuery {
       }
     }
 
-    if (!todo) {
+    if (!todo || todo.deleted_at) {
       throw new TodoNotFound('Todo not found!');
     }
 
@@ -56,7 +64,7 @@ class TodoQuery {
 }
 
 router.get('/', function(req, res) {
-  res.json({ data: todos });
+  res.json({ data: new TodoQuery().findAll() });
 });
 
 router.post('/', function(req, res) {
@@ -105,26 +113,9 @@ router.put('/:id', function(req, res) {
 });
 
 router.delete('/:id', function(req, res) {
-  const { id: todoId } = req.params;
-  let todoIndex = null;
+  const todo = new TodoQuery().findById(req.params.id);
 
-  for (let i = 0; i < todos.length; ++i) {
-    let todoTmp = todos[i];
-    if (todoId == todoTmp.id) {
-      todoIndex = i;
-      break;
-    }
-  }
-
-  if (todoIndex === null) {
-    return res.status(404).json({
-      message: 'Todo not found!',
-    });
-  }
-
-  const todo = todos[todoIndex];
-
-  todos.splice(todoIndex, 1);
+  todo.delete();
 
   return res.json(todo);
 });
