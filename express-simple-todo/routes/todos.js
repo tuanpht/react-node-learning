@@ -63,11 +63,7 @@ class TodoQuery {
   }
 }
 
-router.get('/', function(req, res) {
-  res.json({ data: new TodoQuery().findAll() });
-});
-
-router.post('/', function(req, res) {
+function validateTodoBody(req, res, next) {
   let { title } = req.body;
 
   if (!title || !(title = title.trim())) {
@@ -78,7 +74,15 @@ router.post('/', function(req, res) {
     });
   }
 
-  const todo = new Todo(title);
+  return next();
+}
+
+router.get('/', function(req, res) {
+  res.json({ data: new TodoQuery().findAll() });
+});
+
+router.post('/', validateTodoBody, function(req, res) {
+  const todo = new Todo(req.body.title);
 
   todos.push(todo);
 
@@ -91,18 +95,10 @@ router.get('/:id', function(req, res) {
   return res.json(todo);
 });
 
-router.put('/:id', function(req, res) {
+router.put('/:id', validateTodoBody, function(req, res) {
   const todo = new TodoQuery().findById(req.params.id);
 
   let { title, completed } = req.body;
-
-  if (!title || !(title = title.trim())) {
-    return res.status(422).json({
-      errors: {
-        title: ['Title is required'],
-      },
-    });
-  }
 
   todo.update({
     title,
