@@ -42,24 +42,32 @@ class TodoNotFound extends Error {
 
 class TodoQuery {
   findAll() {
-    return todos.filter((todo) => !todo.deleted_at);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(todos.filter((todo) => !todo.deleted_at));
+      }, Math.random() * 2000);
+    });
   }
 
   findById(id) {
-    let todo = null;
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        let todo = null;
 
-    for (let todoTmp of todos) {
-      if (id == todoTmp.id) {
-        todo = todoTmp;
-        break;
-      }
-    }
+        for (let todoTmp of todos) {
+          if (id == todoTmp.id) {
+            todo = todoTmp;
+            break;
+          }
+        }
 
-    if (!todo || todo.deleted_at) {
-      throw new TodoNotFound('Todo not found!');
-    }
+        if (!todo || todo.deleted_at) {
+          reject(new TodoNotFound('Todo not found!'));
+        }
 
-    return todo;
+        resolve(todo);
+      }, Math.random() * 2000);
+    });
   }
 }
 
@@ -77,8 +85,12 @@ function validateTodoBody(req, res, next) {
   return next();
 }
 
-router.get('/', function(req, res) {
-  res.json({ data: new TodoQuery().findAll() });
+router.get('/', async function(req, res, next) {
+  try {
+    res.json({ data: await new TodoQuery().findAll() });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/', validateTodoBody, function(req, res) {
@@ -89,31 +101,43 @@ router.post('/', validateTodoBody, function(req, res) {
   return res.status(201).json(todo);
 });
 
-router.get('/:id', function(req, res) {
-  const todo = new TodoQuery().findById(req.params.id);
+router.get('/:id', async function(req, res, next) {
+  try {
+    const todo = await new TodoQuery().findById(req.params.id);
 
-  return res.json(todo);
+    return res.json(todo);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.put('/:id', validateTodoBody, function(req, res) {
-  const todo = new TodoQuery().findById(req.params.id);
+router.put('/:id', validateTodoBody, async function(req, res, next) {
+  try {
+    const todo = new TodoQuery().findById(req.params.id);
 
-  let { title, completed } = req.body;
+    let { title, completed } = req.body;
 
-  todo.update({
-    title,
-    completed,
-  });
+    todo.update({
+      title,
+      completed,
+    });
 
-  return res.status(200).json(todo);
+    return res.status(200).json(todo);
+  } catch (err) {
+    next(err);
+  }
 });
 
-router.delete('/:id', function(req, res) {
-  const todo = new TodoQuery().findById(req.params.id);
+router.delete('/:id', async function(req, res, next) {
+  try {
+    const todo = await new TodoQuery().findById(req.params.id);
 
-  todo.delete();
+    todo.delete();
 
-  return res.json(todo);
+    return res.json(todo);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // Error handler
